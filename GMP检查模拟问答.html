@@ -1,0 +1,1576 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GMP检查模拟 · I-125密封籽源 (50题随机10题)</title>
+    <style>
+        /* ===== 全局重置 & 基础 ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'PingFang SC', Roboto, 'Helvetica Neue', sans-serif;
+            background: #f0f4f9;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .game-container {
+            max-width: 860px;
+            width: 100%;
+            background: #ffffff;
+            border-radius: 28px;
+            box-shadow: 0 20px 50px rgba(26, 58, 92, 0.18);
+            overflow: hidden;
+            transition: box-shadow 0.3s;
+        }
+
+        /* ===== 头部 ===== */
+        .header {
+            background: linear-gradient(135deg, #1a3a5c 0%, #1f4a72 100%);
+            padding: 24px 30px 18px;
+            color: #fff;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 20px;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+        }
+
+        .header-title .badge {
+            background: rgba(255, 255, 255, 0.18);
+            border-radius: 40px;
+            padding: 2px 14px;
+            font-size: 12px;
+            font-weight: 400;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .header-stats {
+            font-size: 14px;
+            background: rgba(255, 255, 255, 0.10);
+            padding: 6px 16px;
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .progress-wrap {
+            margin-top: 14px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .progress-bar {
+            flex: 1;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.20);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-bar .fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #f5d98f, #c9a96e);
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+
+        .progress-label {
+            font-size: 13px;
+            font-weight: 500;
+            min-width: 48px;
+            text-align: right;
+            opacity: 0.85;
+        }
+
+        /* ===== 主体 ===== */
+        .main {
+            padding: 26px 30px 18px;
+        }
+
+        /* ===== 问题区域 ===== */
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 4px;
+        }
+
+        .q-number {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1a3a5c;
+            background: #eaf0f8;
+            padding: 4px 16px;
+            border-radius: 30px;
+            letter-spacing: 0.3px;
+        }
+
+        .q-tag {
+            font-size: 13px;
+            color: #7a8fa6;
+            background: #f0f4f9;
+            padding: 4px 14px;
+            border-radius: 30px;
+        }
+
+        .q-title {
+            font-size: 19px;
+            font-weight: 600;
+            color: #0b2a44;
+            margin: 8px 0 4px;
+            letter-spacing: 0.2px;
+        }
+
+        .q-text {
+            background: #f7faff;
+            border-left: 4px solid #c9a96e;
+            padding: 16px 20px;
+            border-radius: 12px;
+            margin: 10px 0 18px;
+            font-size: 16px;
+            line-height: 1.7;
+            color: #1e3a5a;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
+        }
+
+        .q-text::before {
+            content: "🔍 ";
+            font-size: 18px;
+        }
+
+        /* ===== 回答区 ===== */
+        .answer-area {
+            margin: 4px 0 14px;
+        }
+
+        .answer-area label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: #2c4a6a;
+            margin-bottom: 6px;
+        }
+
+        .answer-area textarea {
+            width: 100%;
+            min-height: 90px;
+            padding: 12px 16px;
+            border: 1.5px solid #dce4ed;
+            border-radius: 14px;
+            font-size: 15px;
+            font-family: inherit;
+            line-height: 1.6;
+            color: #1a2e44;
+            background: #fafcff;
+            transition: border-color 0.25s, box-shadow 0.25s;
+            resize: vertical;
+        }
+
+        .answer-area textarea:focus {
+            outline: none;
+            border-color: #1a3a5c;
+            box-shadow: 0 0 0 4px rgba(26, 58, 92, 0.08);
+        }
+
+        .answer-area textarea::placeholder {
+            color: #a0b4c9;
+            font-weight: 300;
+        }
+
+        /* ===== 按钮组 ===== */
+        .action-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 6px 0 14px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 9px 22px;
+            border: none;
+            border-radius: 40px;
+            font-size: 15px;
+            font-weight: 500;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: #eef3f9;
+            color: #1f3f5c;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+        }
+
+        .btn:active {
+            transform: scale(0.97);
+        }
+
+        .btn-primary {
+            background: #1a3a5c;
+            color: #fff;
+        }
+        .btn-primary:hover {
+            background: #0f2d4a;
+            box-shadow: 0 6px 20px rgba(26, 58, 92, 0.25);
+        }
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-gold {
+            background: #c9a96e;
+            color: #fff;
+        }
+        .btn-gold:hover {
+            background: #b89556;
+            box-shadow: 0 6px 20px rgba(201, 169, 110, 0.35);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1.5px solid #d0dbe8;
+            color: #2c4a6a;
+        }
+        .btn-outline:hover {
+            border-color: #1a3a5c;
+            background: #f5f9ff;
+        }
+
+        .btn-sm {
+            padding: 6px 14px;
+            font-size: 13px;
+        }
+
+        .btn-success {
+            background: #2a7a5a;
+            color: #fff;
+        }
+        .btn-success:hover {
+            background: #1e6347;
+            box-shadow: 0 6px 20px rgba(42, 122, 90, 0.3);
+        }
+
+        .btn-icon {
+            font-size: 18px;
+            line-height: 1;
+        }
+
+        /* ===== 解析区 ===== */
+        .explanation {
+            margin-top: 6px;
+            border-top: 2px dashed #e4ecf5;
+            padding-top: 18px;
+            display: none;
+            animation: fadeSlide 0.4s ease;
+        }
+
+        .explanation.open {
+            display: block;
+        }
+
+        @keyframes fadeSlide {
+            0% {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .explanation .exp-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1a3a5c;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .explanation .exp-title span {
+            background: #eaf0f8;
+            padding: 0 12px;
+            border-radius: 30px;
+            font-size: 12px;
+            font-weight: 400;
+            color: #3a5a7a;
+        }
+
+        .exp-block {
+            background: #f8faff;
+            border-radius: 14px;
+            padding: 16px 20px;
+            margin-bottom: 12px;
+            border-left: 4px solid #1a3a5c;
+        }
+
+        .exp-block.gold {
+            border-left-color: #c9a96e;
+            background: #fdfbf7;
+        }
+
+        .exp-block strong {
+            display: block;
+            font-size: 14px;
+            color: #1a3a5c;
+            margin-bottom: 4px;
+        }
+
+        .exp-block p {
+            font-size: 15px;
+            line-height: 1.7;
+            color: #23415e;
+            margin: 0;
+        }
+
+        .exp-block ul {
+            margin: 6px 0 0 20px;
+            font-size: 15px;
+            line-height: 1.7;
+            color: #23415e;
+        }
+
+        .exp-block ul li {
+            margin-bottom: 4px;
+        }
+
+        /* ===== 评分结果 ===== */
+        .score-area {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 2px solid #eaf0f8;
+            display: none;
+        }
+        .score-area.open {
+            display: block;
+        }
+
+        .score-summary {
+            background: #f2f8ff;
+            border-radius: 16px;
+            padding: 18px 22px;
+            text-align: center;
+            margin-bottom: 14px;
+        }
+        .score-summary .big-score {
+            font-size: 48px;
+            font-weight: 700;
+            color: #1a3a5c;
+            line-height: 1.2;
+        }
+        .score-summary .big-score span {
+            font-size: 24px;
+            color: #7a8fa6;
+        }
+        .score-summary .label {
+            font-size: 16px;
+            color: #2c4a6a;
+            margin-top: 4px;
+        }
+
+        .score-detail {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px 16px;
+            max-height: 200px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+        .score-item {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            padding: 4px 8px;
+            background: #fafcff;
+            border-radius: 8px;
+            border-left: 3px solid #c9d6e4;
+        }
+        .score-item .qid {
+            color: #2c4a6a;
+        }
+        .score-item .qscore {
+            font-weight: 600;
+            color: #1a3a5c;
+        }
+        .score-item .qscore.pass {
+            color: #2a7a5a;
+        }
+        .score-item .qscore.fail {
+            color: #b34a4a;
+        }
+
+        /* ===== 底部导航 ===== */
+        .footer-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 14px;
+            margin-top: 10px;
+            padding-top: 16px;
+            border-top: 1px solid #ebf0f6;
+        }
+
+        .dots {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .dot {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 2px solid #dce4ed;
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+            color: #889eb6;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .dot:hover {
+            border-color: #1a3a5c;
+            color: #1a3a5c;
+        }
+
+        .dot.active {
+            border-color: #1a3a5c;
+            background: #1a3a5c;
+            color: #fff;
+        }
+
+        .dot.done {
+            border-color: #c9a96e;
+            background: #c9a96e;
+            color: #fff;
+        }
+        .dot.done::after {
+            content: "✓";
+            font-size: 14px;
+        }
+        .dot.done span {
+            display: none;
+        }
+
+        .dot.scored {
+            border-color: #2a7a5a;
+            background: #2a7a5a;
+            color: #fff;
+        }
+        .dot.scored::after {
+            content: "★";
+            font-size: 14px;
+        }
+        .dot.scored span {
+            display: none;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .btn-submit-score {
+            background: #2a7a5a;
+            color: #fff;
+            padding: 9px 28px;
+            border-radius: 40px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 15px;
+            transition: 0.2s;
+        }
+        .btn-submit-score:hover {
+            background: #1e6347;
+            box-shadow: 0 6px 20px rgba(42, 122, 90, 0.3);
+        }
+        .btn-submit-score:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* ===== 响应式 ===== */
+        @media (max-width: 600px) {
+            .game-container {
+                border-radius: 18px;
+            }
+            .header {
+                padding: 18px 16px 14px;
+            }
+            .header-title {
+                font-size: 17px;
+                gap: 6px;
+            }
+            .main {
+                padding: 16px 16px 14px;
+            }
+            .q-title {
+                font-size: 17px;
+            }
+            .q-text {
+                font-size: 15px;
+                padding: 12px 14px;
+            }
+            .action-bar {
+                gap: 6px;
+            }
+            .btn {
+                padding: 7px 14px;
+                font-size: 14px;
+            }
+            .footer-nav {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 10px;
+            }
+            .nav-buttons {
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+            .dots {
+                justify-content: center;
+            }
+            .dot {
+                width: 28px;
+                height: 28px;
+                font-size: 11px;
+            }
+            .exp-block {
+                padding: 12px 14px;
+            }
+            .score-detail {
+                grid-template-columns: 1fr;
+                max-height: 150px;
+            }
+            .score-summary .big-score {
+                font-size: 36px;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .header-title {
+                font-size: 15px;
+            }
+            .header-stats {
+                font-size: 12px;
+                padding: 4px 10px;
+            }
+            .q-number {
+                font-size: 12px;
+                padding: 2px 10px;
+            }
+            .btn {
+                font-size: 13px;
+                padding: 6px 12px;
+            }
+        }
+
+        /* ===== 工具类 ===== */
+        .hidden {
+            display: none !important;
+        }
+        .text-center {
+            text-align: center;
+        }
+        .mt-8 {
+            margin-top: 8px;
+        }
+        .flex {
+            display: flex;
+        }
+        .flex-center {
+            align-items: center;
+        }
+        .gap-4 {
+            gap: 4px;
+        }
+        .w-full {
+            width: 100%;
+        }
+
+        /* ===== 滚动条美化 ===== */
+        textarea::-webkit-scrollbar,
+        .score-detail::-webkit-scrollbar {
+            width: 6px;
+        }
+        textarea::-webkit-scrollbar-track,
+        .score-detail::-webkit-scrollbar-track {
+            background: #f0f4f9;
+            border-radius: 10px;
+        }
+        textarea::-webkit-scrollbar-thumb,
+        .score-detail::-webkit-scrollbar-thumb {
+            background: #c9d6e4;
+            border-radius: 10px;
+        }
+        textarea::-webkit-scrollbar-thumb:hover {
+            background: #a0b4c9;
+        }
+
+        /* ===== 完成动画 ===== */
+        .celebrate {
+            text-align: center;
+            padding: 8px 0 2px;
+        }
+        .celebrate .big {
+            font-size: 40px;
+            margin-bottom: 4px;
+        }
+        .celebrate h3 {
+            color: #1a3a5c;
+            font-weight: 600;
+            font-size: 20px;
+        }
+        .celebrate p {
+            color: #4a6a8a;
+            font-size: 15px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="game-container" id="app">
+        <!-- ===== 头部 ===== -->
+        <header class="header">
+            <div class="header-top">
+                <div class="header-title">
+                    <span>🏥</span> GMP 检查模拟
+                    <span class="badge">I-125 密封籽源</span>
+                </div>
+                <div class="header-stats" id="statsDisplay">
+                    <span id="answeredCount">0</span> / <span id="totalCount">10</span> 已回答
+                </div>
+            </div>
+            <div class="progress-wrap">
+                <div class="progress-bar">
+                    <div class="fill" id="progressFill" style="width: 0%;"></div>
+                </div>
+                <div class="progress-label" id="progressLabel">0%</div>
+            </div>
+        </header>
+
+        <!-- ===== 主体 ===== -->
+        <main class="main">
+
+            <!-- 问题卡片 -->
+            <div id="questionCard">
+                <div class="question-header">
+                    <span class="q-number" id="qNumber">问题 1/10</span>
+                    <span class="q-tag" id="qTag">辐射防护</span>
+                </div>
+                <h2 class="q-title" id="qTitle">辐射防护措施</h2>
+                <div class="q-text" id="qText">
+                    检查老师提问内容加载中...
+                </div>
+
+                <div class="answer-area">
+                    <label for="answerInput">📝 你的回答：</label>
+                    <textarea id="answerInput" placeholder="请在此输入你的回答，然后点击「查看解析」对照学习…"></textarea>
+                </div>
+
+                <div class="action-bar">
+                    <button class="btn btn-gold" id="btnExplain">📖 查看解析</button>
+                    <button class="btn btn-outline btn-sm" id="btnClear">清空回答</button>
+                    <span style="flex:1; min-width:20px;"></span>
+                    <button class="btn btn-outline btn-sm" id="btnPrev" disabled>◀ 上一题</button>
+                    <button class="btn btn-primary btn-sm" id="btnNext">下一题 ▶</button>
+                </div>
+
+                <!-- 解析区 -->
+                <div class="explanation" id="explanation">
+                    <div class="exp-title">
+                        📋 专业解析
+                        <span>GMP 检查视角</span>
+                    </div>
+                    <div class="exp-block" id="expInterpret">
+                        <strong>🔹 专业解释</strong>
+                        <p>解析内容加载中...</p>
+                    </div>
+                    <div class="exp-block gold" id="expAdvice">
+                        <strong>💡 建议</strong>
+                        <p>建议内容加载中...</p>
+                    </div>
+                </div>
+
+                <!-- 评分结果区域 -->
+                <div class="score-area" id="scoreArea">
+                    <div class="score-summary" id="scoreSummary">
+                        <div class="big-score" id="totalScoreDisplay">0 <span>/ 100</span></div>
+                        <div class="label" id="scoreLabel">请完成全部回答后提交评分</div>
+                    </div>
+                    <div class="score-detail" id="scoreDetail"></div>
+                </div>
+            </div>
+
+            <!-- 完成状态（隐藏） -->
+            <div id="completeState" class="hidden">
+                <div class="celebrate">
+                    <div class="big">🎉</div>
+                    <h3>全部问题已完成！</h3>
+                    <p>你已作答全部 10 道随机题目。<br>点击「提交评分」查看你的成绩。</p>
+                    <div style="margin-top:16px; display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+                        <button class="btn btn-success" id="btnSubmitScore">📊 提交评分</button>
+                        <button class="btn btn-outline" id="btnRestart">🔄 重新抽题</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== 底部导航 ===== -->
+            <div class="footer-nav">
+                <div class="dots" id="dotContainer">
+                    <!-- 由 JavaScript 生成 -->
+                </div>
+                <div class="nav-buttons">
+                    <button class="btn btn-outline btn-sm" id="btnPrevFooter" disabled>◀ 上一题</button>
+                    <button class="btn btn-primary btn-sm" id="btnNextFooter">下一题 ▶</button>
+                    <button class="btn-submit-score" id="btnSubmitScoreFooter">📊 提交评分</button>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        // ============================================================
+        //  题库：50 个 GMP 检查情景提问 (I-125 密封籽源)
+        // ============================================================
+        const fullQuestionBank = [{
+            id: 1,
+            tag: '辐射防护',
+            title: '辐射防护措施',
+            question: '请详细说明 I-125 密封籽源生产车间内，针对操作人员的外照射和内照射防护，具体采取了哪些措施？包括屏蔽设施、个人防护用品、工作流程设计等方面。',
+            explanation: '外照射防护遵循「时间、距离、屏蔽」三原则：①缩短操作时间，优化工作流程；②使用长柄工具增加距离；③配备铅屏蔽容器、铅砖等。内照射防护重在防止摄入或吸入，包括在负压通风橱或手套箱内操作，佩戴高效过滤口罩，穿戴防护服、双层手套，严格执行个人剂量监测（TLD或电子剂量计），工作场所定期进行表面污染和空气采样检测。',
+            advice: '①定期对屏蔽设施进行完整性检查，铅罐、铅砖不得有裂缝或变形；②所有操作人员必须经过辐射防护专项培训并考核合格；③建立个人剂量档案，剂量异常时及时调查并采取改进措施；④工作场所应分区管理，严格区分控制区、监督区和非限制区。',
+            keywords: ['屏蔽', '距离', '时间', '防护服', '手套', '剂量监测', '通风橱']
+        }, {
+            id: 2,
+            tag: '环境监测',
+            title: '洁净车间环境监测',
+            question: '生产 I-125 密封籽源的洁净车间，其洁净度级别是如何确定的？日常环境监测的项目和频率分别是多少？请结合 GMP 要求具体说明。',
+            explanation: 'I-125 密封籽源生产通常在 C 级或 D 级洁净区进行，具体级别取决于工艺操作是否在密闭系统内完成。若在手套箱内操作，背景环境可为 D 级；若涉及暴露操作，则需 C 级。日常监测项目包括：悬浮粒子（≥0.5μm 和 ≥5μm）、浮游菌、沉降菌、表面微生物，以及温度、湿度、压差。频率：C 级区悬浮粒子每周一次，浮游菌每季度一次，沉降菌每月一次；D 级区悬浮粒子每季度一次，浮游菌每半年一次，沉降菌每月一次。压差和温湿度应连续监测或每日记录。',
+            advice: '①环境监测数据应趋势分析，发现异常及时调查；②监测点位应基于风险评估确定，覆盖关键操作区域；③洁净区消毒剂应定期轮换，防止耐药菌株；④人员进入洁净区应严格更衣，控制人数。',
+            keywords: ['洁净度', '悬浮粒子', '浮游菌', '沉降菌', '压差', '温湿度', '频率']
+        }, {
+            id: 3,
+            tag: '原料管理',
+            title: 'I-125 核素原料管理',
+            question: '请描述 I-125 核素从接收到投入生产的全过程管理，包括验收检查、储存条件、领用流程以及台账管理要求。',
+            explanation: 'I-125 作为放射性核素，管理需符合《放射性药品管理办法》和 GMP 要求。接收时核对：核素名称、活度、体积、生产日期、有效期、包装完整性、辐射水平。储存于专用铅屏蔽容器内，存放于双人双锁的放射性原料库，温度控制在规定范围（通常 2~8℃ 或按标示）。领用需填写领用单，经双人复核，记录核素编号、领用量、用途、领用人、复核人、日期。台账需包含：入库记录、领用记录、使用记录、库存盘点，做到账、物、卡一致，并可追溯至每批产品。',
+            advice: '①接收时应对包装表面进行辐射剂量监测，确保符合运输标准；②储存区域应配备温湿度监控和报警系统；③领用和使用应实行「先进先出」原则，避免过期；④台账保存期限至少为药品有效期后一年，且不少于 5 年。',
+            keywords: ['验收', '核对', '双人双锁', '台账', '追溯', '温湿度', '先进先出']
+        }, {
+            id: 4,
+            tag: '生产过程',
+            title: '焊接工艺验证与控制',
+            question: '密封籽源的焊接是关键工艺步骤，请说明该焊接工艺的验证方法，以及日常生产中需要控制的关键工艺参数。',
+            explanation: '焊接工艺验证通常采用「三批次验证」方式，确定最优焊接参数（焊接电流、焊接时间、电极压力、保护气体流量等），验证焊接强度、密封性、外观质量。验证过程中需使用与生产相同的设备和材料，并对焊接样品进行破坏性试验（如拉力测试）和非破坏性试验（如氦质谱检漏）。日常生产中的关键控制参数包括：焊接电流、焊接时间、电极压力、焊接速度、焊点位置等。这些参数应设定工艺范围，并实时监控记录。',
+            advice: '①焊接设备应定期校准，电极需定期更换或修磨；②每批生产前应进行设备点检和参数确认；③焊接后应进行 100% 外观检查，并按比例进行密封性抽检；④工艺再验证应定期进行（通常每年一次），或在设备、材料、工艺变更时进行。',
+            keywords: ['验证', '三批次', '焊接电流', '焊接时间', '电极压力', '密封性', '检漏']
+        }, {
+            id: 5,
+            tag: '质量控制',
+            title: '密封性检测方法',
+            question: 'I-125 密封籽源的密封性检测采用什么方法？合格标准是什么？检测频率如何确定？',
+            explanation: '密封性检测常用方法有：①浸泡法（将籽源浸入液体中，检测液体中是否有放射性泄漏）；②氦质谱检漏法（高灵敏度，适用于高要求密封性检测）。合格标准：浸泡法要求无可见泄漏或液体中放射性活度低于规定限值；氦质谱检漏法通常要求泄漏率 ≤ 1×10⁻⁸ Pa·m³/s。检测频率：通常每批产品按一定比例抽检（如 5%~10%），也可根据工艺稳定性采用全检。对于首次生产或工艺变更后，应加大抽检比例。',
+            advice: '①检测方法应经过验证，确保能够有效检出泄漏；②检测用标准品应可追溯，并定期校准；③若发现泄漏，应立即启动偏差调查，评估对产品质量的影响，并采取纠正和预防措施（CAPA）；④检测记录应完整保存，包括检测数据、合格判定、操作人员等信息。',
+            keywords: ['浸泡法', '氦质谱', '泄漏率', '抽检', '合格标准', '验证', '偏差调查']
+        }, {
+            id: 6,
+            tag: '包装运输',
+            title: '包装与运输合规',
+            question: '请说明 I-125 密封籽源成品的包装要求，以及运输过程中需要遵守的主要法规和注意事项。',
+            explanation: 'I-125 密封籽源属于放射性物品，包装需符合《放射性物质安全运输规程》（GB 11806）和 IAEA 运输条例。包装类型通常为 A 型或 B 型包装，具体取决于活度水平。包装要求：①包装容器应能有效屏蔽辐射，确保外表面剂量率不超过规定限值（如 2 mSv/h 在距表面 1m 处）；②包装应密封、防震、防潮，并带有放射性标识和警示标签；③随附文件包括：放射性物质运输说明书、货包证书等。运输需遵守《放射性物品运输安全管理条例》，选择有资质的运输单位，制定运输应急预案。',
+            advice: '①包装设计应经过型式试验和验证；②发货前应对每个货包进行表面剂量率和污染检测，并记录；③运输途中应实时跟踪，确保运输条件符合要求；④建立运输异常应急处理程序，培训相关人员。',
+            keywords: ['GB 11806', 'IAEA', 'A型', 'B型', '剂量率', '标识', '应急预案']
+        }, {
+            id: 7,
+            tag: '人员管理',
+            title: '人员培训与健康管理',
+            question: '从事 I-125 密封籽源生产的人员，需要接受哪些方面的培训？个人剂量监测是如何实施的？',
+            explanation: '培训内容涵盖：①辐射防护基础知识和法规；② GMP 基础知识及本岗位 SOP；③岗位操作技能（如焊接、检测、包装等）；④应急处理（如泄漏、火灾、人员受照等）；⑤放射性废物管理。培训需有考核和记录，每年复训。个人剂量监测：所有辐射工作人员佩戴个人剂量计（TLD 或 OSL 或电子剂量计），按周期（通常每月或每季度）送检，读取剂量值并记录在个人剂量档案中。剂量异常时需及时调查并采取干预措施。',
+            advice: '①新员工上岗前必须完成所有培训并通过考核；②建立培训档案，保存培训记录、考核成绩、证书等；③孕妇或备孕人员应调离辐射工作岗位；④个人剂量档案应永久保存，人员离职后仍需按规定保存。',
+            keywords: ['培训', 'SOP', '剂量计', 'TLD', '剂量档案', '复训', '应急处理']
+        }, {
+            id: 8,
+            tag: '设备管理',
+            title: '关键设备校准与维护',
+            question: '生产用的关键设备（如活度计、焊接设备、检测设备）的校准和维护保养是如何进行的？请说明具体措施。',
+            explanation: '关键设备管理需遵循 GMP 设备管理要求：①建立设备台账，制定校准和维护计划；②活度计应使用可追溯的标准源进行定期校准（通常每年一次），并在每次使用前用检验源进行自检；③焊接设备应定期检查电极状态、电气参数，并按照维护计划进行保养（如清洁、润滑、更换易损件）；④检测设备（如检漏仪、剂量率仪）同样需定期校准，并保留校准证书。所有校准、维护、维修活动均需记录在案。',
+            advice: '①制定详细的设备操作和维护 SOP，操作人员需培训合格方可操作；②设备发生故障或维修后，应重新确认其性能符合要求方可投入使用；③校准应使用有资质的计量机构，校准证书需确认其符合使用要求；④建立设备故障应急预案，配备关键备件。',
+            keywords: ['校准', '维护', '活度计', '标准源', '自检', '台账', 'SOP']
+        }, {
+            id: 9,
+            tag: '文件记录',
+            title: '批记录完整性与可追溯性',
+            question: 'I-125 密封籽源的批生产记录应包括哪些内容？如何确保记录的真实性、完整性和可追溯性？',
+            explanation: '批生产记录应涵盖从原料领用到成品入库的全过程，包括：①原料信息（核素批号、活度、用量）；②生产操作步骤及参数（焊接参数、环境温湿度、压差等）；③过程控制数据（中间品检测结果、焊接质量检查）；④成品检验结果（活度、密封性、外观等）；⑤设备使用记录；⑥人员操作签名；⑦偏差处理记录。确保记录真实性：及时填写（操作中记录），不得提前或事后补写；数据修改需划线签名并注明理由。可追溯性：通过批号可追溯到所有原料、设备、人员、检验数据，实现前后向追溯。',
+            advice: '①记录应使用不易褪色的笔填写，不得使用铅笔；②所有记录均应受控管理，避免丢失或篡改；③批记录审核应由 QA 人员完成，确认所有数据完整无误；④电子记录应具备权限管理和审计追踪功能。',
+            keywords: ['批记录', '追溯', '真实性', '完整性', 'QA', '偏差', '签名']
+        }, {
+            id: 10,
+            tag: '废弃物处理',
+            title: '放射性废弃物处理',
+            question: '生产过程中产生的放射性废弃物是如何分类、收集、暂存和最终处置的？请详细说明。',
+            explanation: '放射性废弃物按活度水平和物理形态分类：①固体废物（如手套、擦拭纸、废弃籽源、报废原料等）；②液体废物（如清洗液、淋洗液等）；③气体废物（经高效过滤后排放）。收集时使用专用容器（铅罐、塑料袋、不锈钢桶等），标明废物类别、核素、活度、产生日期。暂存于放射性废物库，双人双锁管理，定期检测暂存区域的辐射水平。最终处置：委托有资质的放射性废物处置单位进行集中处置，并办理相关转移手续，保留转移联单。',
+            advice: '①废弃物应分类收集，严禁混放；②建立废弃物管理台账，记录产生量、暂存量、转移量；③暂存库应设置明显的放射性警示标识，并配备应急处理物资；④定期对暂存库进行巡检和辐射监测，确保安全。',
+            keywords: ['分类', '收集', '暂存', '处置', '双人双锁', '台账', '转移联单']
+        }, {
+            id: 11,
+            tag: '辐射防护',
+            title: '辐射监测仪器管理',
+            question: '请说明车间内使用的辐射监测仪器（如剂量率仪、表面污染仪）的日常管理和校验要求。',
+            explanation: '辐射监测仪器需建立台账，定期送有资质的计量机构进行校准（通常每年一次）。日常使用前应进行自检（如用检验源检查响应），使用后清洁并记录使用情况。仪器应存放在干燥、无强磁场的环境。发现异常应立即停用，并追溯之前的数据有效性。',
+            advice: '①每台仪器应有唯一编号和校准状态标识；②校准证书应存档，并确认结果符合使用要求；③操作人员应经过仪器使用培训；④建立仪器故障应急措施，备有备用仪器。',
+            keywords: ['剂量率仪', '表面污染仪', '校准', '自检', '台账', '校验']
+        }, {
+            id: 12,
+            tag: '生产过程',
+            title: '籽源装载操作规范',
+            question: '在将 I-125 源芯装载入钛管并进行焊接的过程中，有哪些关键操作控制点？',
+            explanation: '关键控制点包括：①源芯活度确认和外观检查；②钛管清洁度检查；③装载时避免源芯损伤；④焊接参数严格执行已验证的工艺；⑤焊接后立即进行外观检查和密封性初检；⑥每批次记录所有操作参数。',
+            advice: '①操作应双人复核，确保源芯位置正确；②使用显微镜检查焊接点质量；③装载区域应保持洁净，防止异物污染；④操作人员应佩戴防辐射眼镜和手套。',
+            keywords: ['装载', '钛管', '焊接', '源芯', '双人复核', '外观检查']
+        }, {
+            id: 13,
+            tag: '质量控制',
+            title: '活度测量方法',
+            question: 'I-125 密封籽源的活度测量采用什么仪器？测量前需做哪些准备工作？测量结果如何判定？',
+            explanation: '活度测量使用经校准的活度计（如 CRC-25R 或类似型号）。测量前需：①活度计开机预热稳定；②使用标准源进行自检，确认响应正常；③选择合适的测量几何位置；④本底测量。测量时，将籽源放入特定测量井，读取活度值。结果判定：活度应在标示值的 ±10% 以内（或根据注册标准）。',
+            advice: '①活度计应定期用可追溯标准源校准；②测量时应记录环境温湿度，因为可能影响测量；③测量结果应双人复核；④异常活度值需调查原因，并重新测量。',
+            keywords: ['活度计', '标准源', '自检', '本底', '±10%', '复核']
+        }, {
+            id: 14,
+            tag: '包装运输',
+            title: '运输容器验证',
+            question: '运输 I-125 密封籽源的货包容器需要进行哪些验证？验证周期是多久？',
+            explanation: '货包容器需进行型式试验，包括：①屏蔽性能验证（测量不同方向的剂量率）；②密封性验证（防水、防泄漏）；③耐撞击、耐堆码、耐振动等机械性能测试；④耐热、耐低温等环境适应性测试。验证应在容器投入使用前完成，后续每 2-3 年或发生重大维修后重新验证。',
+            advice: '①验证应由有资质的检测机构进行；②验证报告应存档，并作为运输合规依据；③日常使用前应检查容器外观和密封性；④容器应编号管理，记录使用和维护历史。',
+            keywords: ['型式试验', '屏蔽', '密封', '撞击', '堆码', '验证周期']
+        }, {
+            id: 15,
+            tag: '人员管理',
+            title: '辐射安全培训内容',
+            question: '辐射安全培训中，针对新员工和在职员工的培训重点有何不同？',
+            explanation: '新员工培训侧重：①辐射基础知识和法规；②工作场所辐射风险辨识；③防护用品穿戴和使用；④基本操作规程；⑤应急响应程序。在职员工培训侧重：①新设备或新工艺的操作；②事故案例分析和经验反馈；③辐射防护最新要求；④定期复训考核，确保知识更新。',
+            advice: '①培训应分层次，针对岗位定制内容；②培训效果应通过考试或实操考核验证；③培训记录应保存完整，包括签到、考核成绩等；④每次培训后应有反馈和改进。',
+            keywords: ['新员工', '在职', '辐射基础', '操作规程', '应急', '复训']
+        }, {
+            id: 16,
+            tag: '设备管理',
+            title: '焊接设备日常点检',
+            question: '焊接设备每日使用前需进行哪些点检项目？',
+            explanation: '点检项目包括：①电源线和接头是否完好；②电极是否磨损或氧化，必要时更换；③冷却水系统（如有）是否正常；④焊接电流和电压显示是否准确；⑤保护气体压力是否充足；⑥脚踏开关或按钮是否灵敏；⑦焊接台面清洁无异物。所有点检应记录于点检表。',
+            advice: '①点检表应列出所有项目，操作人员逐项确认；②发现异常应立即停用并报修；③点检记录应至少保存至设备报废；④定期对点检表进行审核，优化项目。',
+            keywords: ['点检', '电极', '冷却水', '电流', '电压', '保护气体', '记录']
+        }, {
+            id: 17,
+            tag: '文件记录',
+            title: '电子记录与审计追踪',
+            question: '对于采用电子记录的设备，如何确保数据完整性和审计追踪？',
+            explanation: '电子记录系统应具备：①用户权限管理，不同级别人员拥有不同操作权限；②审计追踪功能，记录所有数据修改、删除、新增操作，包括操作者、时间、修改原因；③定期备份，防止数据丢失；④系统验证，确保其符合 21 CFR Part 11 或类似法规要求；⑤数据不可篡改，所有修改都留下痕迹。',
+            advice: '①电子记录系统应经过验证方可使用；②定期检查审计追踪日志，确保无异常操作；③备份数据应存储于安全位置，并定期恢复测试；④系统升级或变更后需重新验证。',
+            keywords: ['电子记录', '审计追踪', '权限管理', '备份', '验证', '21 CFR']
+        }, {
+            id: 18,
+            tag: '废弃物处理',
+            title: '放射性废液处理',
+            question: '生产过程中产生的放射性废液（如清洗液）如何处理？',
+            explanation: '放射性废液应收集于专用容器中，标明核素、活度、体积、产生日期。根据活度浓度，可选择：①暂时存放于衰变池，待活度降至豁免水平后按非放射性废液处理；②委托有资质的放射性废物处理单位进行固化或焚烧等处理。处理过程需有详细记录，包括转移联单。',
+            advice: '①废液收集容器应防泄漏，并置于不锈钢托盘内；②定期检测废液活度，确定处理方式；③处理单位资质需审核，并签订正式合同；④处理记录应永久保存。',
+            keywords: ['废液', '衰变池', '固化', '转移联单', '资质', '活度']
+        }, {
+            id: 19,
+            tag: '环境监测',
+            title: '工作场所辐射监测',
+            question: 'I-125 生产工作场所的辐射监测包括哪些内容？监测频率如何？',
+            explanation: '工作场所辐射监测包括：①外照射剂量率监测（使用剂量率仪定期巡检）；②表面污染监测（使用表面污染仪擦拭或直接测量）；③空气污染监测（使用气溶胶采样器，检测空气中 I-125 浓度）。频率：剂量率通常每周一次，表面污染每次操作后，空气采样每月或每季度一次，具体根据风险评估确定。',
+            advice: '①监测点位应覆盖所有操作区域和人员驻留点；②监测结果应记录并与限值比较，超标立即启动调查；③监测仪器应处于有效校准状态；④建立长期趋势分析，及时发现异常。',
+            keywords: ['剂量率', '表面污染', '空气采样', '频率', '限值', '趋势分析']
+        }, {
+            id: 20,
+            tag: '生产过程',
+            title: '清洁与消毒程序',
+            question: '洁净车间内，设备和台面的清洁与消毒程序是如何规定的？消毒剂如何选择？',
+            explanation: '清洁消毒程序包括：①每日工作结束后，用清洁剂擦拭设备和台面，去除可见污物；②然后用消毒剂（如 75% 乙醇、异丙醇、过氧化氢等）进行消毒，确保消毒剂接触时间足够；③消毒剂应轮换使用，避免微生物产生耐药性；④每周进行深度清洁，包括死角。清洁消毒后需填写记录，并定期进行微生物监测验证效果。',
+            advice: '①消毒剂应经验证，证明其对生产环境中常见微生物有效；②清洁工具应专用，避免交叉污染；③清洁消毒记录应详细，包括时间、人员、消毒剂批号；④定期回顾清洁效果，必要时调整程序。',
+            keywords: ['清洁', '消毒', '消毒剂', '轮换', '验证', '记录']
+        }, {
+            id: 21,
+            tag: '质量控制',
+            title: '外观检查标准',
+            question: '密封籽源成品的外观检查包括哪些项目？合格标准是什么？',
+            explanation: '外观检查在放大镜下进行，检查项目包括：①钛管表面应光滑，无划痕、凹坑、裂纹；②焊缝应均匀，无气孔、裂纹、未熔合等缺陷；③籽源长度、直径应符合图纸要求；④标记清晰可读（如有）。合格标准：所有外观项目均符合规定，任何缺陷均判为不合格。',
+            advice: '①外观检查人员应经过培训，视力或矫正视力正常；②检查环境光线充足，使用标准照明；③检查结果应记录，不合格品应隔离并调查；④定期检查人员间的一致性。',
+            keywords: ['外观', '钛管', '焊缝', '划痕', '裂纹', '尺寸', '标记']
+        }, {
+            id: 22,
+            tag: '包装运输',
+            title: '运输标签与文件',
+            question: '放射性物品运输的标签和随行文件有哪些要求？',
+            explanation: '运输标签包括：放射性标志牌（I 级白、II 级黄、III 级黄）、联合国编号（UN 2915 等）、运输指数、核素名称、活度等。随行文件包括：放射性物质运输说明书（包含应急措施）、货包证书（证明包装符合要求）、发货人及收货人信息、紧急联系人电话等。',
+            advice: '①标签应牢固粘贴在货包外表面，不易脱落；②所有文件应随货包携带，并妥善保管；③发货前应仔细核对标签和文件信息是否正确；④运输人员应经过培训，了解文件内容。',
+            keywords: ['标签', '放射性标志', '运输指数', 'UN编号', '说明书', '货包证书']
+        }, {
+            id: 23,
+            tag: '人员管理',
+            title: '辐射工作人员健康体检',
+            question: '辐射工作人员的健康体检项目和要求有哪些？',
+            explanation: '辐射工作人员应进行岗前、在岗和离岗健康体检。体检项目包括：①血液学检查（全血细胞计数、染色体畸变分析等）；②眼科检查（晶状体混浊）；③皮肤检查；④甲状腺功能检查（因 I-125 可能影响甲状腺）。体检周期一般为每年一次。体检结果由职业卫生医师评估，并给出是否适合继续从事辐射工作的意见。',
+            advice: '①体检机构应具备相应资质；②体检档案应长期保存，并与个人剂量档案关联；③发现异常应及时调离岗位并进行医学随访；④员工应知晓体检结果并签字确认。',
+            keywords: ['健康体检', '血液学', '染色体', '甲状腺', '晶状体', '体检周期']
+        }, {
+            id: 24,
+            tag: '设备管理',
+            title: '活度计使用前自检',
+            question: '活度计每天使用前应进行哪些自检？',
+            explanation: '每日自检包括：①开机预热（按说明书要求）；②测量本底计数，确认本底正常；③使用检验源（如 Cs-137 或 Co-60 等）测量响应，计算与参考值的偏差，应在允许范围内（如 ±5%）；④检查设备运行状态，无报警或异常。自检结果应记录于日志。',
+            advice: '①检验源应可追溯，并在有效期内；②若自检不合格，应停止使用并报告工程师；③自检记录应至少保存一年；④定期进行自检数据趋势分析，发现早期故障。',
+            keywords: ['自检', '本底', '检验源', '偏差', '记录', '预热']
+        }, {
+            id: 25,
+            tag: '辐射防护',
+            title: '个人防护用品管理与更换',
+            question: '辐射防护用的防护服、手套、口罩等是如何管理和更换的？',
+            explanation: '个人防护用品（PPE）由专人管理，建立领用和更换记录。防护服和手套在每次操作后更换，若发现破损立即更换；口罩根据厂家说明和使用环境定期更换（通常每4小时或根据污染程度）。所有使用过的 PPE 作为放射性废物处理。',
+            advice: '① PPE 应存放在专用柜中，避免污染；②使用前应检查完整性；③不同防护级别的 PPE 应区分；④定期对 PPE 的防护效果进行抽检（如手套针孔检测）。',
+            keywords: ['防护服', '手套', '口罩', '更换', '管理', '破损']
+        }, {
+            id: 26,
+            tag: '生产过程',
+            title: '生产偏差处理',
+            question: '若在生产过程中发现参数偏离规定范围，应如何处理？',
+            explanation: '立即停止操作，隔离受影响的产品，启动偏差调查。调查应分析根本原因，评估对产品质量的影响，确定是否可返工或报废。同时制定纠正和预防措施（CAPA），修订相关文件，防止再次发生。所有过程应有记录。',
+            advice: '①偏差报告应及时，不得隐瞒；②调查应跨部门进行，确保全面；③CAPA 应跟踪落实，并验证有效性；④偏差记录应作为批记录的一部分。',
+            keywords: ['偏差', '隔离', '调查', 'CAPA', '根本原因', '返工']
+        }, {
+            id: 27,
+            tag: '环境监测',
+            title: '沉降菌监测方法',
+            question: '洁净区的沉降菌监测具体如何操作？培养条件是什么？',
+            explanation: '使用直径为 90mm 的培养皿，内装适宜培养基（如胰蛋白胨大豆琼脂），在监测点打开皿盖，暴露 4 小时（或按标准），然后盖好，在 30-35℃ 培养 48-72 小时，计数菌落数。监测点应选在操作台面、人员活动频繁区域等关键位置。',
+            advice: '①培养皿应在有效期内使用；②取样前应检查培养基有无污染；③培养后菌落计数应双人复核；④监测结果应动态分析，超标时调查原因。',
+            keywords: ['沉降菌', '培养皿', '暴露', '培养', '计数', '监测点']
+        }, {
+            id: 28,
+            tag: '文件记录',
+            title: '记录修改规范',
+            question: '纸质记录中，如果发生填写错误，应如何修改才符合 GMP 要求？',
+            explanation: '错误处应划一横线（保留原内容可辨），在旁边空白处填写正确内容，并签名和日期，必要时注明修改理由。不得使用涂改液、覆盖、擦除等方式。电子记录的修改应通过审计追踪记录。',
+            advice: '①所有修改应清晰可辨，不得模糊；②修改理由应充分并记录；③关键数据（如活度值）的修改需额外复核；④定期审核记录，检查修改规范性。',
+            keywords: ['修改', '划一横线', '签名', '日期', '涂改液', '审计追踪']
+        }, {
+            id: 29,
+            tag: '原料管理',
+            title: '原料库存盘点',
+            question: '放射性原料如何进行库存盘点？盘点频率和流程是什么？',
+            explanation: '库存盘点应每月进行一次，由双人进行，核对账、物、卡是否一致，包括核素活度、数量、存放位置。盘点结果应记录，如有差异需调查原因并调整台账。年度盘点应更全面，邀请 QA 见证。',
+            advice: '①盘点前应确保所有出入库记录已入账；②差异调查应追踪到具体操作环节；③盘点报告应存档，作为管理评审依据；④实行「先进先出」原则，避免过期。',
+            keywords: ['盘点', '双人', '账物卡', '差异', '调查', '先进先出']
+        }, {
+            id: 30,
+            tag: '质量控制',
+            title: '检验样品管理',
+            question: '用于质量检验的样品（如密封性检测样品）是如何管理的？',
+            explanation: '检验样品应有唯一标识，记录取样日期、批号、数量、取样人。样品按照要求存放（如干燥、避光），在规定时间内完成检验。检验后剩余样品按规定处理（如作为废物或留样）。留样应保存至有效期后一年。',
+            advice: '①样品应密封包装，避免污染或混淆；②检验记录应注明样品编号；③留样应有专用区域，并定期检查；④样品销毁应有记录和批准。',
+            keywords: ['样品', '标识', '留样', '有效期', '销毁', '记录']
+        }, {
+            id: 31,
+            tag: '辐射防护',
+            title: '应急响应计划',
+            question: '请描述生产现场发生放射性泄漏时的应急响应步骤。',
+            explanation: '应急响应步骤：①立即停止操作，疏散无关人员；②穿戴好个人防护用品，进入泄漏区域；③用吸水纸或棉布覆盖泄漏物，防止扩散；④使用辐射监测仪确定污染范围；⑤去污处理（用去污剂擦拭），并收集废物；⑥对人员、设备、环境进行辐射监测，确认无残留污染；⑦填写事故报告，启动调查。',
+            advice: '①定期进行应急演练，确保人员熟悉流程；②应急物资应备齐且在有效期内；③泄漏事件应按规定向监管部门报告；④演练后应评估改进。',
+            keywords: ['泄漏', '疏散', '防护', '去污', '监测', '事故报告', '演练']
+        }, {
+            id: 32,
+            tag: '设备管理',
+            title: '设备标识与状态管理',
+            question: '生产设备应如何标识？运行状态（如正常、维修、校准等）如何管理？',
+            explanation: '每台设备应有唯一编号和名称标识。状态标识包括：运行中、待机、维修、校准、报废等，以颜色区分（如绿色正常、红色维修）。标识应悬挂或粘贴在设备显眼处。当设备状态变更时，应及时更换标识。',
+            advice: '①标识应清晰、牢固，不易脱落；②状态变更应有记录，注明变更原因和日期；③维修或校准后的设备需经确认合格方可挂「运行」标识；④定期检查标识完整性。',
+            keywords: ['标识', '状态', '运行', '维修', '校准', '颜色']
+        }, {
+            id: 33,
+            tag: '生产过程',
+            title: '清洁验证',
+            question: '洁净区设备清洁后，如何进行清洁验证？验证项目有哪些？',
+            explanation: '清洁验证通过擦拭或淋洗取样，检测残留物（如放射性、化学残留、微生物）。验证项目包括：目视检查、残留物限度检测（如用擦拭法测活度或化学残留量）、微生物限度检测。验证应连续进行三批合格生产，确定清洁程序有效性。之后定期再验证。',
+            advice: '①取样点应选择最难清洁的位置；②残留限度应根据毒理学数据或产品最低日剂量确定；③验证方案应事先批准；④清洁验证失败时需调查并修改清洁程序。',
+            keywords: ['清洁验证', '擦拭', '淋洗', '残留物', '微生物', '三批']
+        }, {
+            id: 34,
+            tag: '包装运输',
+            title: '货包表面污染检测',
+            question: '发货前，货包表面污染如何检测？限值是多少？',
+            explanation: '使用表面污染仪（如薄窗 GM 管或闪烁探测器）对货包外表面进行测量，重点在可能接触的部位。限值要求：对于 β/γ 发射体，表面污染限值通常为 4 Bq/cm²（可擦拭污染）。对于 I-125（γ 发射），通常也参照该限值。若超过限值，需去污处理后重新检测。',
+            advice: '①检测仪器应校准有效，探测效率已知；②检测时应扣除本底；③检测结果应记录并附于运输文件；④如污染水平接近限值，应进行二次确认。',
+            keywords: ['表面污染', '检测', '限值', 'Bq/cm²', '去污', '记录']
+        }, {
+            id: 35,
+            tag: '人员管理',
+            title: '人员进出洁净区流程',
+            question: '人员进入洁净区的更衣流程和注意事项是什么？',
+            explanation: '进入流程：①在一般区脱去外衣；②进入更衣室（D级）穿洁净服、戴口罩、帽、手套，经缓冲间（C级）再次更衣（无菌服等）或直接进入。注意：人员应洗手消毒，不得佩戴首饰，不得化妆，更衣顺序应避免污染，离开时反向操作并脱下污染手套等作为废物。',
+            advice: '①更衣流程应张贴在更衣室显眼处；②定期对更衣效果进行微生物监测（手套、口罩）；③人员应经过更衣培训，考核合格；④限制进入人数，避免拥挤。',
+            keywords: ['更衣', '洁净服', '洗手', '消毒', '缓冲间', '监测']
+        }, {
+            id: 36,
+            tag: '质量控制',
+            title: '不合格品处理',
+            question: '发现不合格的密封籽源（如活度超标、密封性不合格）应如何处理？',
+            explanation: '不合格品应立即隔离，并贴上红色不合格标签。启动偏差调查，分析原因。根据调查结果，处理方式包括：①返工（如重新焊接，但需经批准并重新检验）；②报废（作为放射性废物处置）。所有处理均需记录，并经 QA 审核。',
+            advice: '①不合格品应单独存放，严防混入合格品；②返工方案需经过验证和审批；③报废过程应符合放射性废物管理要求；④应进行趋势分析，减少不合格发生。',
+            keywords: ['不合格', '隔离', '标签', '返工', '报废', 'QA']
+        }, {
+            id: 37,
+            tag: '环境监测',
+            title: '压差监测与记录',
+            question: '洁净区与非洁净区之间的压差如何监测？合格标准是多少？',
+            explanation: '压差使用压差计（如机械式或电子式）监测，通常安装在洁净区与非洁净区之间的墙壁上。合格标准：洁净区对非洁净区应保持≥10 Pa 的正压差，不同洁净级别之间应保持≥5 Pa。压差应连续监测，每日记录，异常时报警。',
+            advice: '①压差计应定期校准；②记录应包括时间、数值、签名；③压差异常时，应立即检查送排风系统；④长期趋势分析，预防性维护。',
+            keywords: ['压差', '正压', 'Pa', '监测', '记录', '校准']
+        }, {
+            id: 38,
+            tag: '原料管理',
+            title: '原料有效期管理',
+            question: 'I-125 核素具有半衰期，如何管理其有效期，确保使用前仍在有效期内？',
+            explanation: 'I-125 半衰期约 60 天，因此有效期较短。管理上应：①在原料标签上标注生产日期和有效日期（通常以活度衰减到某一限度计算）；②使用「先进先出」原则；③定期盘点，对即将过期的原料优先使用；④到期未用原料应按放射性废物处理，并做好记录。',
+            advice: '①建立预警机制，提前提醒有效期；②有效期计算应基于物理衰变和产品需求；③过期原料不得用于生产；④处理过期原料需符合废物管理规定。',
+            keywords: ['有效期', '半衰期', '先进先出', '预警', '过期', '废物']
+        }, {
+            id: 39,
+            tag: '生产过程',
+            title: '批号编制规则',
+            question: 'I-125 密封籽源的批号是如何编制的？应包含哪些信息？',
+            explanation: '批号通常由字母和数字组成，包含：①产品代码；②生产日期（年、月、日）；③流水号。例如：I-125-240101-01。批号应能唯一标识一批产品，并便于追溯。批号编制规则应写入文件，并确保唯一性。',
+            advice: '①批号不得重复使用；②批号应打印或标签粘贴于产品及记录上；③批号编制应避免混淆；④电子系统中应设置批号唯一性校验。',
+            keywords: ['批号', '编制', '唯一性', '追溯', '日期', '流水号']
+        }, {
+            id: 40,
+            tag: '辐射防护',
+            title: '孕妇辐射防护',
+            question: '对于已怀孕的辐射工作人员，有哪些特殊防护措施？',
+            explanation: '根据法规，孕妇应调离辐射工作岗位，或采取额外防护措施，如减少接触时间、增加屏蔽、安排非辐射工作。个人剂量计应继续佩戴，并定期评估。企业应制定相关政策，鼓励员工主动申报怀孕情况。',
+            advice: '①制定并公示孕妇辐射防护政策；②怀孕申报应保密处理；③合理安排工作，避免胎儿受照超过限值（1 mSv 整个孕期）；④提供必要的咨询和支持。',
+            keywords: ['孕妇', '调离', '额外防护', '剂量限值', '申报', '政策']
+        }, {
+            id: 41,
+            tag: '设备管理',
+            title: '设备故障处理',
+            question: '关键设备（如焊接机）发生故障时，应如何处理？',
+            explanation: '立即停止使用，挂「故障」标识，并通知设备工程师。工程师根据故障现象进行诊断，维修后需进行性能确认（如试焊接并检验）。维修和确认记录应保存。若影响已生产产品，需评估影响范围。',
+            advice: '①建立设备故障应急预案，关键备件齐全；②维修后应进行再验证或确认；③故障处理应有时限要求，减少停产影响；④故障原因应分析，采取预防措施。',
+            keywords: ['故障', '标识', '维修', '确认', '记录', '预案']
+        }, {
+            id: 42,
+            tag: '文件记录',
+            title: '文件受控管理',
+            question: 'GMP 相关文件（SOP、记录等）是如何进行受控管理的？',
+            explanation: '所有 GMP 文件应统一编号，经起草、审核、批准后方可生效。文件发放和回收应有记录，确保现场使用最新版本。旧版文件应盖「作废」章，除留档外一律收回。文件修订应有变更记录和理由。',
+            advice: '①建立文件管理台账，清晰记录版本状态；②定期审核文件适用性，及时修订；③文件存放应方便获取，但受控；④电子文件应有权限管理。',
+            keywords: ['受控', '版本', '发放', '回收', '作废', '变更']
+        }, {
+            id: 43,
+            tag: '生产过程',
+            title: '生产现场管理（5S）',
+            question: '生产车间的现场管理（如 5S）是如何实施的？',
+            explanation: '5S 包括整理、整顿、清扫、清洁、素养。具体：①整理：区分要与不要的物品，清除无用物；②整顿：物品定置定位，标识清晰；③清扫：每日清洁设备、地面；④清洁：标准化前 3S，并制度化；⑤素养：培养员工习惯，遵守规范。5S 活动应定期检查并评分。',
+            advice: '① 5S 活动需全员参与，长期坚持；②制定 5S 检查表，每周巡查；③问题点应及时整改，闭环管理；④将 5S 纳入员工绩效考核。',
+            keywords: ['5S', '整理', '整顿', '清扫', '清洁', '素养']
+        }, {
+            id: 44,
+            tag: '质量控制',
+            title: '稳定性考察',
+            question: 'I-125 密封籽源是否需要进行稳定性考察？如何制定考察计划？',
+            explanation: '需要进行稳定性考察，以确认产品在有效期内质量符合标准。由于 I-125 为放射性药品，考察主要关注物理外观、密封性、活度（随衰变变化）等。考察计划包括：样品批次（通常首批、末批）、时间点（0、3、6、12 个月等）、储存条件（与实际储存一致）。考察结果应形成报告。',
+            advice: '①稳定性考察应遵循 ICH 指导原则；②考察样品应具有代表性；③考察数据应进行统计分析，确定有效期；④发现趋势异常应及时调查。',
+            keywords: ['稳定性', '考察', '有效期', '活度', '外观', '密封性']
+        }, {
+            id: 45,
+            tag: '包装运输',
+            title: '运输途中温度控制',
+            question: '对于温度敏感的 I-125 籽源（如某些包装要求冷链），运输途中如何确保温度符合要求？',
+            explanation: '使用带温度记录仪的保温箱或冷藏车，确保运输温度维持在规定的范围（如 2-8℃）。发货前检查冰排或制冷剂状态，温度记录仪应校准，运输过程中持续记录，到货后读取数据，确认无超温。若超温，需启动偏差调查，评估产品质量影响。',
+            advice: '①温度记录仪应定期校准；②制定运输温度应急预案（如中途超温的处理）；③运输商应经过资质审核和培训；④温度数据应存档，作为质量追溯依据。',
+            keywords: ['温度', '冷链', '保温箱', '记录仪', '超温', '应急预案']
+        }, {
+            id: 46,
+            tag: '人员管理',
+            title: '人员授权与上岗',
+            question: '哪些人员需要获得授权才能独立操作关键设备？授权流程是怎样的？',
+            explanation: '关键设备（如焊接机、活度计、包装机）的操作人员需经过培训和考核，由质量负责人或部门主管授权。授权流程：①完成理论培训并通过考试；②在师傅指导下进行实际操作，达到熟练；③通过实际操作考核（如焊接样品合格）；④填写授权申请表，经批准后颁发上岗证。授权需定期复审。',
+            advice: '①授权应形成书面记录，包括培训、考核、评估；②授权应有有效期，过期需重新考核；③人员换岗或设备更新后需重新授权；④未经授权人员不得独立操作。',
+            keywords: ['授权', '上岗', '培训', '考核', '操作', '复审']
+        }, {
+            id: 47,
+            tag: '环境监测',
+            title: '浮游菌采样方法',
+            question: '洁净区浮游菌采样采用的仪器和方法是什么？采样量如何确定？',
+            explanation: '浮游菌采样使用撞击式空气微生物采样器（如 Anderson 采样器），将空气以一定流量撞击到琼脂平板上，培养后计数。采样量根据洁净级别确定：C 级通常采样量 ≥1000 L，D 级 ≥500 L。采样点应选在关键区域，采样高度为工作台面高度。',
+            advice: '①采样器应定期校验流量；②培养基在有效期内，且经过无菌性检查；③采样后应在规定时间内培养，避免干燥；④结果应记录并趋势分析。',
+            keywords: ['浮游菌', '采样器', '撞击', '琼脂平板', '采样量', '培养']
+        }, {
+            id: 48,
+            tag: '废弃物处理',
+            title: '放射性废物分类标准',
+            question: '放射性废物按活度浓度是如何分类的？分别采取什么处理方式？',
+            explanation: '根据活度浓度，放射性废物分为低水平、中水平、高水平。对于 I-125 生产，主要产生低水平废物（如手套、擦拭纸等）。低水平废物可暂存衰变后按普通废物处理，或直接送处理单位。中水平废物（如废弃籽源）需固化或水泥固定后送处置场。高水平废物在 I-125 生产中极少。',
+            advice: '①分类应依据国家法规和标准；②每批次废物应检测活度，正确分类；③分类后的废物应分别包装和标识；④处理单位应具备相应资质。',
+            keywords: ['分类', '活度浓度', '低水平', '中水平', '固化', '处置']
+        }, {
+            id: 49,
+            tag: '生产过程',
+            title: '生产记录的实时填写',
+            question: '为什么强调批生产记录必须实时填写？禁止提前或补写？',
+            explanation: '实时填写确保数据的真实性和准确性，避免记忆错误或遗漏。提前填写可能导致数据无法反映实际工艺参数，补写则容易产生偏差或造假。实时填写也符合 GMP 对数据完整性的要求。',
+            advice: '①操作人员应养成习惯，操作后立即记录；②现场应设置方便书写的位置；③管理人员应定期抽查记录及时性；④对于电子记录，应设置时间戳。',
+            keywords: ['实时', '真实', '准确', '提前', '补写', '数据完整性']
+        }, {
+            id: 50,
+            tag: '辐射防护',
+            title: '辐射工作场所分区',
+            question: '辐射工作场所如何分区？各区域的管理要求有何不同？',
+            explanation: '根据 GB 18871，辐射工作场所分为控制区、监督区、非限制区。控制区（如操作室）需严格限制人员进入，佩戴剂量计，穿戴防护用品，安装警示灯。监督区（如更衣室）需定期监测辐射水平。非限制区（如办公室）无辐射风险。区域边界应有明显标识。',
+            advice: '①分区应经过辐射防护评估确定；②控制区入口应设置门禁和警示；③不同区域之间应有缓冲带；④定期审查分区合理性。',
+            keywords: ['控制区', '监督区', '非限制区', '标识', '门禁', '监测']
+        }];
+
+        // ============================================================
+        //  应用状态
+        // ============================================================
+        const state = {
+            pool: [], // 当前抽取的10题（原对象）
+            current: 0, // 当前题目在pool中的索引
+            answers: [], // 用户回答，长度10
+            explained: [], // 是否查看解析
+            scored: false, // 是否已评分
+            scoreDetails: [], // 每题得分
+            totalScore: 0,
+        };
+
+        // ============================================================
+        //  DOM 引用
+        // ============================================================
+        const $ = (id) => document.getElementById(id);
+        const qNumber = $('qNumber');
+        const qTag = $('qTag');
+        const qTitle = $('qTitle');
+        const qText = $('qText');
+        const answerInput = $('answerInput');
+        const btnExplain = $('btnExplain');
+        const btnClear = $('btnClear');
+        const btnPrev = $('btnPrev');
+        const btnNext = $('btnNext');
+        const btnPrevFooter = $('btnPrevFooter');
+        const btnNextFooter = $('btnNextFooter');
+        const explanation = $('explanation');
+        const expInterpret = $('expInterpret');
+        const expAdvice = $('expAdvice');
+        const dotContainer = $('dotContainer');
+        const progressFill = $('progressFill');
+        const progressLabel = $('progressLabel');
+        const answeredCount = $('answeredCount');
+        const totalCount = $('totalCount');
+        const statsDisplay = $('statsDisplay');
+        const questionCard = $('questionCard');
+        const completeState = $('completeState');
+        const btnRestart = $('btnRestart');
+        const btnSubmitScore = $('btnSubmitScore');
+        const btnSubmitScoreFooter = $('btnSubmitScoreFooter');
+        const scoreArea = $('scoreArea');
+        const totalScoreDisplay = $('totalScoreDisplay');
+        const scoreLabel = $('scoreLabel');
+        const scoreDetail = $('scoreDetail');
+
+        // ============================================================
+        //  工具函数
+        // ============================================================
+        function shuffleArray(arr) {
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        // 从50题中随机选10题
+        function selectRandomQuestions() {
+            const shuffled = shuffleArray([...fullQuestionBank]);
+            return shuffled.slice(0, 10);
+        }
+
+        // 关键词评分：检查回答中包含关键词的个数，返回0-10分
+        function scoreAnswer(answer, keywords) {
+            if (!answer || answer.trim().length === 0) return 0;
+            const lower = answer.toLowerCase();
+            let found = 0;
+            for (let kw of keywords) {
+                if (lower.includes(kw.toLowerCase())) {
+                    found++;
+                }
+            }
+            const ratio = found / keywords.length;
+            if (ratio >= 0.6) return 10;
+            if (ratio >= 0.4) return 7;
+            if (ratio >= 0.2) return 4;
+            return 1; // 有回答但关键词太少，给1分以示鼓励
+        }
+
+        // ============================================================
+        //  核心渲染函数
+        // ============================================================
+
+        function renderDots() {
+            dotContainer.innerHTML = '';
+            for (let i = 0; i < state.pool.length; i++) {
+                const dot = document.createElement('div');
+                dot.className = 'dot';
+                if (i === state.current) dot.classList.add('active');
+                if (state.answers[i] && state.answers[i].trim().length > 0) dot.classList.add('done');
+                if (state.scored) {
+                    dot.classList.remove('done', 'active');
+                    dot.classList.add('scored');
+                }
+                const span = document.createElement('span');
+                span.textContent = i + 1;
+                dot.appendChild(span);
+                dot.dataset.index = i;
+                dot.addEventListener('click', () => goTo(i));
+                dotContainer.appendChild(dot);
+            }
+        }
+
+        function updateProgress() {
+            const answered = state.answers.filter(a => a && a.trim().length > 0).length;
+            const pct = Math.round((answered / state.pool.length) * 100);
+            progressFill.style.width = pct + '%';
+            progressLabel.textContent = pct + '%';
+            answeredCount.textContent = answered;
+            totalCount.textContent = state.pool.length;
+        }
+
+        function updateStats() {
+            const answered = state.answers.filter(a => a && a.trim().length > 0).length;
+            statsDisplay.innerHTML = `<span id="answeredCount">${answered}</span> / <span id="totalCount">${state.pool.length}</span> 已回答`;
+        }
+
+        function loadQuestion(index) {
+            const q = state.pool[index];
+            qNumber.textContent = `问题 ${index+1}/${state.pool.length}`;
+            qTag.textContent = q.tag;
+            qTitle.textContent = q.title;
+            qText.textContent = q.question;
+
+            // 恢复回答
+            answerInput.value = state.answers[index] || '';
+
+            // 解析状态
+            if (state.explained[index]) {
+                explanation.classList.add('open');
+                expInterpret.querySelector('p').textContent = q.explanation;
+                expAdvice.querySelector('p').textContent = q.advice;
+            } else {
+                explanation.classList.remove('open');
+            }
+
+            // 按钮状态
+            btnPrev.disabled = (index === 0);
+            btnPrevFooter.disabled = (index === 0);
+            btnNext.disabled = (index === state.pool.length - 1);
+            btnNextFooter.disabled = (index === state.pool.length - 1);
+
+            // 更新小圆点
+            document.querySelectorAll('.dot').forEach((d, i) => {
+                d.className = 'dot';
+                if (i === index) d.classList.add('active');
+                if (state.answers[i] && state.answers[i].trim().length > 0) d.classList.add('done');
+                if (state.scored) {
+                    d.classList.remove('done', 'active');
+                    d.classList.add('scored');
+                }
+            });
+
+            // 如果已评分，显示评分结果，否则隐藏
+            if (state.scored) {
+                scoreArea.classList.add('open');
+                // 更新评分显示（但不会改变）
+            } else {
+                scoreArea.classList.remove('open');
+            }
+
+            // 滚动到顶部
+            document.querySelector('.main').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function goTo(index) {
+            if (state.scored) return; // 评分后禁止切换? 但允许查看，切换时不重置评分
+            if (index < 0 || index >= state.pool.length) return;
+            // 保存当前回答
+            state.answers[state.current] = answerInput.value;
+            state.current = index;
+            loadQuestion(index);
+            updateProgress();
+            updateStats();
+        }
+
+        function nextQuestion() {
+            if (state.scored) return;
+            if (state.current < state.pool.length - 1) {
+                state.answers[state.current] = answerInput.value;
+                state.current++;
+                loadQuestion(state.current);
+                updateProgress();
+                updateStats();
+            }
+        }
+
+        function prevQuestion() {
+            if (state.scored) return;
+            if (state.current > 0) {
+                state.answers[state.current] = answerInput.value;
+                state.current--;
+                loadQuestion(state.current);
+                updateProgress();
+                updateStats();
+            }
+        }
+
+        function showExplanation() {
+            const idx = state.current;
+            const q = state.pool[idx];
+            state.explained[idx] = true;
+            explanation.classList.add('open');
+            expInterpret.querySelector('p').textContent = q.explanation;
+            expAdvice.querySelector('p').textContent = q.advice;
+            // 保存回答
+            state.answers[idx] = answerInput.value;
+            updateProgress();
+            updateStats();
+            renderDots();
+        }
+
+        function clearAnswer() {
+            if (state.scored) return;
+            answerInput.value = '';
+            state.answers[state.current] = '';
+            updateProgress();
+            updateStats();
+            renderDots();
+        }
+
+        // 提交评分
+        function submitScore() {
+            // 检查是否所有题目都有回答（非空）
+            const allAnswered = state.answers.every(a => a && a.trim().length > 0);
+            if (!allAnswered) {
+                alert('请先完成所有10道题的回答再提交评分！');
+                return;
+            }
+
+            // 计算每道题的得分
+            let details = [];
+            let total = 0;
+            for (let i = 0; i < state.pool.length; i++) {
+                const q = state.pool[i];
+                const ans = state.answers[i] || '';
+                const score = scoreAnswer(ans, q.keywords);
+                details.push({ index: i, score: score, max: 10 });
+                total += score;
+            }
+            state.scoreDetails = details;
+            state.totalScore = total;
+            state.scored = true;
+
+            // 显示评分区域
+            scoreArea.classList.add('open');
+            totalScoreDisplay.innerHTML = `${total} <span>/ 100</span>`;
+            if (total >= 80) scoreLabel.textContent = '✅ 优秀！你对GMP和辐射防护理解深入。';
+            else if (total >= 60) scoreLabel.textContent = '📘 良好，部分要点可加强，建议复习解析。';
+            else scoreLabel.textContent = '📖 需要加强学习，仔细对照解析查漏补缺。';
+
+            // 显示每题得分
+            scoreDetail.innerHTML = '';
+            details.forEach(d => {
+                const item = document.createElement('div');
+                item.className = 'score-item';
+                const qid = document.createElement('span');
+                qid.className = 'qid';
+                qid.textContent = `第 ${d.index+1} 题`;
+                const qscore = document.createElement('span');
+                qscore.className = 'qscore ' + (d.score >= 7 ? 'pass' : 'fail');
+                qscore.textContent = `${d.score} / 10`;
+                item.appendChild(qid);
+                item.appendChild(qscore);
+                scoreDetail.appendChild(item);
+            });
+
+            // 更新导航按钮状态
+            btnSubmitScore.disabled = true;
+            btnSubmitScoreFooter.disabled = true;
+            btnSubmitScoreFooter.textContent = '✅ 已评分';
+
+            // 更新所有小圆点为已评分样式
+            renderDots();
+            // 隐藏完成状态
+            completeState.classList.add('hidden');
+            questionCard.classList.remove('hidden');
+
+            // 跳转到第一题（显示评分）
+            state.current = 0;
+            loadQuestion(0);
+            updateProgress();
+            updateStats();
+        }
+
+        // 重新抽题
+        function restart() {
+            // 重置状态
+            state.pool = selectRandomQuestions();
+            state.current = 0;
+            state.answers = new Array(state.pool.length).fill('');
+            state.explained = new Array(state.pool.length).fill(false);
+            state.scored = false;
+            state.scoreDetails = [];
+            state.totalScore = 0;
+
+            questionCard.classList.remove('hidden');
+            completeState.classList.add('hidden');
+            scoreArea.classList.remove('open');
+            btnSubmitScore.disabled = false;
+            btnSubmitScoreFooter.disabled = false;
+            btnSubmitScoreFooter.textContent = '📊 提交评分';
+
+            // 重置显示
+            loadQuestion(0);
+            updateProgress();
+            updateStats();
+            renderDots();
+            explanation.classList.remove('open');
+        }
+
+        // 检查是否全部回答完毕，显示完成状态（但保留评分功能）
+        function checkComplete() {
+            const allAnswered = state.answers.every(a => a && a.trim().length > 0);
+            if (allAnswered && !state.scored) {
+                // 显示完成提示（可以在底部显示一条消息，但我们有导航栏的提交评分按钮）
+                // 此处不额外处理，由用户点击提交评分
+            }
+        }
+
+        // ============================================================
+        //  事件绑定
+        // ============================================================
+
+        // 输入时自动保存
+        answerInput.addEventListener('input', function() {
+            if (state.scored) return;
+            state.answers[state.current] = this.value;
+            updateProgress();
+            updateStats();
+            renderDots();
+            // 检查是否全部回答
+            checkComplete();
+        });
+
+        btnExplain.addEventListener('click', showExplanation);
+
+        btnClear.addEventListener('click', clearAnswer);
+
+        btnPrev.addEventListener('click', prevQuestion);
+        btnNext.addEventListener('click', nextQuestion);
+        btnPrevFooter.addEventListener('click', prevQuestion);
+        btnNextFooter.addEventListener('click', nextQuestion);
+
+        btnSubmitScore.addEventListener('click', submitScore);
+        btnSubmitScoreFooter.addEventListener('click', submitScore);
+
+        btnRestart.addEventListener('click', restart);
+
+        // 键盘快捷键
+        document.addEventListener('keydown', (e) => {
+            if (state.scored) return;
+            if (e.target.tagName === 'TEXTAREA') {
+                if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+                    e.preventDefault();
+                    showExplanation();
+                }
+                return;
+            }
+            if (e.key === 'ArrowLeft' && state.current > 0) {
+                e.preventDefault();
+                prevQuestion();
+            } else if (e.key === 'ArrowRight' && state.current < state.pool.length - 1) {
+                e.preventDefault();
+                nextQuestion();
+            }
+        });
+
+        // ============================================================
+        //  初始化
+        // ============================================================
+
+        function init() {
+            state.pool = selectRandomQuestions();
+            state.answers = new Array(state.pool.length).fill('');
+            state.explained = new Array(state.pool.length).fill(false);
+            state.scored = false;
+            totalCount.textContent = state.pool.length;
+            loadQuestion(0);
+            updateProgress();
+            updateStats();
+            renderDots();
+            // 隐藏评分区
+            scoreArea.classList.remove('open');
+            console.log('💡 快捷键: Ctrl+Enter 查看解析 | ← → 切换题目');
+        }
+
+        init();
+    </script>
+
+</body>
+</html>
